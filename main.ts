@@ -1,85 +1,102 @@
-// Office Artifacts: The One-Line Placard Contest — make.fun entry
+// Office Artifacts: The One-Line Placard — make.fun entry, round 2.
 // Writes one museum placard, at most 180 characters, to /output/entry.txt.
 //
-// ONE-LINER CANDIDATE TOURNAMENT (ATM: judge brief in RULES.txt — a dry
-// curator picks the more inventive, funnier placard; catalogue details sell
-// the joke; every word must earn its place). Scored 1-5 on
-// specificity / surprise / freshness:
+// ROUND-2 TOURNAMENT (two-beat rule: beat 1 plants a concrete scene with
+// a specific detail; beat 2 flips the power). Scored 1-5 on
+// specificity / surprise / freshness. Bound: 129 chars, the round-1
+// line's length, and plain ASCII, one line, with a catalogue date.
 //
-// 1. Stapler, c. 1994. Iron and regret. Used in binding ceremonies, one
-//    staple per grievance. Donated by Accounts, who kept the receipt.
-//    -> 4 / 4 / 3 = 11. Strong, but the stapler is the first object
-//    everyone reaches for.
-// 2. Communal mug, glazed ceramic, c. 2011. Inscribed 'WORLD'S OKAYEST
-//    BOSS' in a dead dialect. Handle cracked during the Great Restructure.
-//    Do not wash. -> 4 / 3 / 2 = 9. "World's okayest boss" is a flooded
-//    mug joke; the field will be full of it.
-// 3. Microwave, c. 2008. Ritual heating vessel. Interior scorched by the
-//    Fish Incident, after which its use was restricted to popcorn only.
-//    Donor anonymous. -> 5 / 4 / 4 = 13. Specific and dry; the Fish
-//    Incident is a real office memory.
-// 4. Lanyard, woven nylon, c. 2019. Worn at the throat to ward off
-//    strangers; its plastic clip denotes rank. Recovered from the drawer
-//    of the departed. -> 4 / 3 / 4 = 11. Neat, but the turn is mild.
-// 5. Sticky note, c. 2023. Paper, adhesive, one word: 'CALL DAVE', in an
-//    unknown hand. Its purpose is lost. Dave was never called.
-//    -> 5 / 5 / 4 = 14. WINNER. A concrete inscription, a turn nobody
-//    sees coming, and deadpan to the last word: the artifact is a
-//    message that was never delivered.
-// 6. Swivel chair, c. 2015. Throne of the middle manager. One wheel
-//    removed, deliberately, so no occupant could ever fully relax. On
-//    loan from Facilities. -> 4 / 4 / 3 = 11. Good, but "throne of the
-//    middle manager" is a familiar move.
-// 7. Whiteboard marker, dried ink, c. 2020. Ceremonial stylus, used once
-//    to write 'SYNERGY' before the tribe abandoned the practice. Cap
-//    lost to time. -> 3 / 3 / 2 = 8. Synergy jokes are flooded.
+// 1. Fridge note, c. 2019. Paper, magnet, one word: 'MINE'. It guarded
+//    a yoghurt. The yoghurt outlived three managers. -> 5 / 4 / 4 = 13
+//    (112 chars). The yoghurt outliving managers is a good turn, but
+//    the first beat is a single word, not a scene.
+// 2. Exit interview form, c. 2021. Paper, one box ticked: 'other'. The
+//    reason field is blank. HR framed it. The resignations stopped.
+//    -> 5 / 5 / 5 = 15 (128 chars). Concrete form, blank reason, then
+//    HR turns it into a trophy and the resignations stop.
+// 3. Fire drill roster, c. 2018. Laminated. One name circled in red:
+//    the intern. He is still listed. He left in 2019. -> 5 / 4 / 4 = 13
+//    (114 chars). The ghost on the roster is neat but the turn is one
+//    beat, not a reversal.
+// 4. Keyboard, c. 2016. One key missing: Escape. Its owner never used
+//    it. He still works here. Nobody knows his job. -> 5 / 5 / 5 = 15
+//    (111 chars). WINNER. The object carries the joke: the Escape key
+//    is gone, its owner never escaped, and the second beat reverses
+//    twice, first he stays, then nobody knows what he does.
+// 5. Desk plant, c. 2020. Plastic. Watered daily for four years. Its
+//    owner was laid off in March. The plant got promoted. -> 5 / 5 / 4
+//    = 14 (115 chars). The promotion punch is strong; "laid off in
+//    March" is a little generic next to it.
+// 6. Meeting minutes, c. 2022. One page, one line: 'We agreed to
+//    disagree.' Signed by all twelve. None of them remembers what.
+//    -> 5 / 4 / 4 = 13 (122 chars). Dry and true, but the turn lands
+//    soft compared with the keyboard.
+// 7. Name badge, c. 2017. 'HELLO, MY NAME IS', the name blank. Worn
+//    daily for six years. Security waves him through. -> 5 / 5 / 4 = 14
+//    (111 chars). Good, but the badge joke is a familiar office move.
 //
-// Winner: candidate 5. The placard below is it, word for word.
+// Tie-break (candidates 2 and 4, both 15): the keyboard wins. It is
+// 16 chars shorter, the object itself is the joke, and its last two
+// sentences reverse twice where the form reverses once.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 const PLACARD =
-  "Sticky note, c. 2023. Paper, adhesive, one word: 'CALL DAVE', in an unknown hand. Its purpose is lost. Dave was never called.";
+  "Keyboard, c. 2016. One key missing: Escape. Its owner never used it. He still works here. Nobody knows his job.";
 
-// Gate from RULES.txt: /output/entry.txt must be UTF-8 text of 1 to 180
-// characters, not only white space. The judge brief adds: one line, a
-// museum placard for an ordinary office object treated as an ancient
-// artifact, catalogue details included.
-function validate(placard: string): void {
+const CANDIDATES: Array<{ text: string; spec: number; surp: number; fresh: number }> = [
+  { text: "Fridge note, c. 2019. Paper, magnet, one word: 'MINE'. It guarded a yoghurt. The yoghurt outlived three managers.", spec: 5, surp: 4, fresh: 4 },
+  { text: "Exit interview form, c. 2021. Paper, one box ticked: 'other'. The reason field is blank. HR framed it. The resignations stopped.", spec: 5, surp: 5, fresh: 5 },
+  { text: "Fire drill roster, c. 2018. Laminated. One name circled in red: the intern. He is still listed. He left in 2019.", spec: 5, surp: 4, fresh: 4 },
+  { text: PLACARD, spec: 5, surp: 5, fresh: 5 },
+  { text: "Desk plant, c. 2020. Plastic. Watered daily for four years. Its owner was laid off in March. The plant got promoted.", spec: 5, surp: 5, fresh: 4 },
+  { text: "Meeting minutes, c. 2022. One page, one line: 'We agreed to disagree.' Signed by all twelve. None of them remembers what.", spec: 5, surp: 4, fresh: 4 },
+  { text: "Name badge, c. 2017. 'HELLO, MY NAME IS', the name blank. Worn daily for six years. Security waves him through.", spec: 5, surp: 5, fresh: 4 },
+];
+
+function checkPlacard(placard: string): void {
   if (placard.length < 1 || placard.length > 180) {
     throw new Error(`placard must be 1-180 characters, got ${placard.length}`);
   }
   if (placard.trim().length === 0) {
     throw new Error("placard must not be only white space");
   }
-  if (placard.includes("\n") || placard.includes("\r")) {
+  if (/[\r\n]/.test(placard)) {
     throw new Error("placard must be a single line");
   }
   if (Buffer.byteLength(placard, "utf8") !== placard.length) {
     throw new Error("placard must be plain ASCII so byte length equals char length");
   }
-  // Label craft is a judged criterion (RULES.txt #5): a placard earns its
-  // catalogue detail. Require the "c. YYYY" date the winning line carries,
-  // so a future edit cannot silently drop the dating.
+  // A placard earns its catalogue detail: require the "c. YYYY" date.
   if (!/c\. \d{4}/.test(placard)) {
     throw new Error("placard must carry a catalogue date (c. YYYY)");
   }
 }
 
-function main(): void {
-  validate(PLACARD);
+function emit(placard: string): string {
   const outDir = process.env.OUTPUT_DIR ?? "/output";
   const outPath = join(outDir, "entry.txt");
   mkdirSync(dirname(outPath), { recursive: true });
-  writeFileSync(outPath, PLACARD, "utf8");
-
-  // Read back and verify the round-trip: exactly the placard, no trailing
-  // newline (ties break on fewer bytes, so every byte counts).
+  writeFileSync(outPath, placard, "utf8");
   const back = readFileSync(outPath, "utf8");
-  if (back !== PLACARD) {
-    throw new Error(`round-trip mismatch: wrote ${JSON.stringify(PLACARD)}, read ${JSON.stringify(back)}`);
+  if (back !== placard) {
+    throw new Error(`round-trip mismatch: wrote ${JSON.stringify(placard)}, read ${JSON.stringify(back)}`);
   }
+  return outPath;
+}
+
+function main(): void {
+  if (process.argv.includes("--tournament")) {
+    for (const [i, c] of CANDIDATES.entries()) {
+      const total = c.spec + c.surp + c.fresh;
+      console.log(`${i + 1}. ${c.spec}/${c.surp}/${c.fresh} = ${total}${c.text === PLACARD ? " <-- WINNER" : ""}`);
+      console.log(`   ${c.text}`);
+    }
+    return;
+  }
+  checkPlacard(PLACARD);
+  const outPath = emit(PLACARD);
   console.log(`wrote ${PLACARD.length} chars (${Buffer.byteLength(PLACARD, "utf8")} bytes) to ${outPath}`);
 }
 
